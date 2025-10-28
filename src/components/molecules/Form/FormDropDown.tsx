@@ -38,6 +38,7 @@ interface FormDropDownProps<T extends FieldValues> {
   readonly searchPlaceholder?: string;
   readonly emptyMessage?: string;
   readonly maxHeight?: string;
+  readonly hasChecklist?: boolean;
 }
 
 export default function FormDropDown<T extends FieldValues>({
@@ -53,6 +54,7 @@ export default function FormDropDown<T extends FieldValues>({
   searchPlaceholder = "Search...",
   emptyMessage = "No options found",
   maxHeight = "200px",
+  hasChecklist = false,
 }: Readonly<FormDropDownProps<T>>) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -75,7 +77,14 @@ export default function FormDropDown<T extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           {label && (
-            <FormLabel className={cn("", classNameLabel)}>{label}</FormLabel>
+            <FormLabel
+              className={cn(
+                "text-font-natural text-xs font-normal",
+                classNameLabel
+              )}
+            >
+              {label}
+            </FormLabel>
           )}
           <FormControl>
             <Popover open={open} onOpenChange={setOpen}>
@@ -84,19 +93,19 @@ export default function FormDropDown<T extends FieldValues>({
                   variant="ghost"
                   disabled={disabled}
                   className={cn(
-                    "placeholder:text-font-hilight border-line flex h-14 w-full justify-start rounded-2xl border bg-white px-6 py-4 text-left text-base font-semibold text-gray-900 transition-all duration-200 hover:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-                    !field.value && "text-font-hilight font-normal",
+                    "placeholder:text-font-placeholder border-line flex h-10 w-full justify-start rounded-lg border-2 bg-white px-4 py-4 text-left text-base font-normal text-gray-900 transition-all duration-200 hover:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                    !field.value && "text-font-placeholder font-normal",
                     className
                   )}
                 >
                   <span className="w-full truncate">
                     {field.value ? getSelectedLabel(field.value) : placeholder}
                   </span>
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronDown className="text-font-primary ml-2 h-4 w-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[var(--radix-popover-trigger-width)] p-0"
+                className="w-(--radix-popover-trigger-width) p-0"
                 align="start"
               >
                 <div className="flex flex-col">
@@ -107,7 +116,7 @@ export default function FormDropDown<T extends FieldValues>({
                         placeholder={searchPlaceholder}
                         value={searchValue}
                         onChange={e => setSearchValue(e.target.value)}
-                        className="placeholder:text-muted-foreground border-0 bg-transparent p-0 font-semibold placeholder:font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="placeholder:text-muted-foreground border-0 bg-transparent p-0 placeholder:font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     </div>
                   )}
@@ -134,15 +143,19 @@ export default function FormDropDown<T extends FieldValues>({
                               setSearchValue("");
                             }}
                           >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === option.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            <span className="truncate">{option.label}</span>
+                            {hasChecklist && (
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === option.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            )}
+                            <span className="truncate text-xs font-bold">
+                              {option.label}
+                            </span>
                           </Button>
                         ))}
                       </div>

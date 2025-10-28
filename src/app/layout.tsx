@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Hiring Management",
   },
   description:
-    "Automate your hiring process with AI. Say goodbye to manual data entry and hello to effortless recruitment management.",
+    "Simple and efficient hiring management system to streamline your recruitment process.",
 };
 
 export default function RootLayout({ children }: Readonly<ChildrenProps>) {

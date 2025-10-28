@@ -142,7 +142,7 @@ export default function FormUpload<T extends FieldValues>({
                     className="flex w-full items-center"
                   >
                     <div className="bg-secondary flex min-w-0 flex-1 items-center rounded-lg p-1">
-                      <div className="mr-2 h-full flex-shrink-0 rounded-[7px] bg-white p-1">
+                      <div className="mr-2 h-full shrink-0 rounded-[7px] bg-white p-1">
                         <InvoiceIcon
                           width={24}
                           height={30}
@@ -162,7 +162,7 @@ export default function FormUpload<T extends FieldValues>({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="ml-2 h-8 w-8 flex-shrink-0 p-0 text-red-500 hover:bg-transparent hover:text-red-700"
+                      className="ml-2 h-8 w-8 shrink-0 p-0 text-red-500 hover:bg-transparent hover:text-red-700"
                       onClick={() => handleRemoveFile(index, onChange)}
                     >
                       <TrashIcon className="h-6 w-6" />

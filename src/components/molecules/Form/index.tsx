@@ -3,5 +3,13 @@ import FormCalendar from "./FormCalendar";
 import FormDropDown from "./FormDropDown";
 import FormUpload from "./FormUpload";
 import FormCheckbox from "./FormCheckbox";
+import FormProfileRequirement from "./FormProfileRequirement";
 
-export { FormInput, FormCalendar, FormDropDown, FormUpload, FormCheckbox };
+export {
+  FormInput,
+  FormCalendar,
+  FormDropDown,
+  FormUpload,
+  FormCheckbox,
+  FormProfileRequirement,
+};

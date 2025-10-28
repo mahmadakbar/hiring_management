@@ -1,8 +1,7 @@
 "use client";
 
-// import { RakaminLogo } from "@assets/icon";
+import HeaderBreadCrumb from "@components/molecules/BreadCrumb/HeaderBreadCrumb";
 import ProfileHeader from "@components/molecules/Profile/ProfileHeader";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Header() {
@@ -14,12 +13,10 @@ export default function Header() {
   if (blacklistPaths.includes(pathname)) {
     return null;
   }
+
   return (
     <header className="flex shrink-0 items-center justify-between rounded-lg bg-white px-4 py-5 text-black shadow-sm">
-      <Link href="/">
-        {/* <RakaminLogo /> */}
-        <h1 className="text-lg font-bold">Job List</h1>
-      </Link>
+      <HeaderBreadCrumb />
       <ProfileHeader />
     </header>
   );

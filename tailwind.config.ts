@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -40,14 +39,25 @@ const config: Config = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          active: "hsl(var(--accent-active))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          active: "hsl(var(--destructive-active))",
         },
-        border: "hsl(var(--border))",
-        "border-grey": "oklch(var(--border-grey))",
-        "border-blue": "oklch(var(--border-blue))",
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          active: "hsl(var(--warning-active))",
+        },
+        border: {
+          DEFAULT: "oklch(var(--border))",
+          accent: "oklch(var(--border-accent))",
+          grey: "oklch(var(--border-grey))",
+          blue: "oklch(var(--border-blue))",
+          secondary: "oklch(var(--border-secondary))",
+        },
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
@@ -60,6 +70,7 @@ const config: Config = {
         font: {
           primary: "oklch(var(--font-primary))",
           secondary: "oklch(var(--font-secondary))",
+          tertiary: "oklch(var(--font-tertiary))",
           natural: "oklch(var(--font-natural))",
           hilight: "oklch(var(--font-hilight))",
           placeholder: "oklch(var(--font-placeholder))",

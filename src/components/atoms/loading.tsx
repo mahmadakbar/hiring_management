@@ -5,6 +5,7 @@ interface LoadingSpinnerProps {
   className?: string;
   text?: string;
   showText?: boolean;
+  color?: string;
 }
 
 const sizeClasses = {
@@ -24,6 +25,7 @@ export default function LoadingSpinner({
   className,
   text = "Loading...",
   showText = true,
+  color,
 }: Readonly<LoadingSpinnerProps>) {
   return (
     <div
@@ -37,7 +39,8 @@ export default function LoadingSpinner({
         <div
           className={cn(
             "border-primary/20 border-t-primary animate-spin rounded-full",
-            sizeClasses[size]
+            sizeClasses[size],
+            color && `border-${color}/20 border-t-${color}`
           )}
         ></div>
       </div>

@@ -10,6 +10,7 @@ import {
 import { Input } from "@components/atoms/input";
 import { cn } from "@utils";
 import { Eye, EyeOff } from "lucide-react";
+import { formatMoneyInput } from "@utils/helper";
 
 import { useState } from "react";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
@@ -20,6 +21,7 @@ type InputType =
   | "email"
   | "password"
   | "number"
+  | "money"
   | "tel"
   | "url"
   | "search"
@@ -35,9 +37,10 @@ interface FormInputProps<T extends FieldValues> {
   readonly type?: InputType;
   readonly disabled?: boolean;
   readonly className?: string;
-  readonly hasForgottenPassword?: boolean;
   readonly classNameLabel?: string;
   readonly additionalInfo?: string;
+  readonly maxLength?: number;
+  readonly value?: string | number;
 }
 
 export default function FormInput<T extends FieldValues>({
@@ -50,6 +53,8 @@ export default function FormInput<T extends FieldValues>({
   className,
   classNameLabel,
   additionalInfo,
+  maxLength,
+  value,
 }: Readonly<FormInputProps<T>>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordType = type === "password";
@@ -90,13 +95,9 @@ export default function FormInput<T extends FieldValues>({
             <FormControl>
               <div className="relative flex">
                 {additionalInfo && (
-                  <Input
-                    className={cn(
-                      "w-2/12 rounded-r-none bg-white placeholder:font-normal",
-                      error && "border-destructive"
-                    )}
-                    value={additionalInfo}
-                  />
+                  <span className="text-font-primary absolute top-1/2 left-4 -translate-y-1/2 transform text-sm font-bold">
+                    {additionalInfo}
+                  </span>
                 )}
                 {type === "textarea" ? (
                   <Textarea
@@ -104,29 +105,43 @@ export default function FormInput<T extends FieldValues>({
                     disabled={disabled}
                     className={cn(
                       `placeholder:font-normal} bg-white`,
-                      additionalInfo ? "rounded-l-none border-l-0" : "",
                       error && "border-destructive",
+                      additionalInfo ? "pl-10" : "",
                       className
                     )}
                     {...field}
                     onChange={e => field.onChange(e.target.value)}
                     rows={4}
+                    maxLength={maxLength}
+                    value={value || field.value}
                   />
                 ) : (
                   <Input
-                    type={inputType}
+                    type={inputType === "money" ? "text" : inputType}
                     placeholder={placeholder}
                     disabled={disabled}
+                    maxLength={maxLength}
                     className={cn(
-                      `bg-white placeholder:font-normal ${type === "number" ? "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" : ""}`,
-                      additionalInfo ? "rounded-l-none border-l-0" : "",
+                      `bg-white placeholder:font-normal ${type === "number" || type === "money" ? "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" : ""}`,
                       error && "border-destructive",
+                      additionalInfo ? "pl-10" : "",
                       className
                     )}
                     {...field}
+                    value={
+                      type === "money" && field.value
+                        ? `${formatMoneyInput(String(field.value).replace(/^Rp\s*/, ""))}`
+                        : value || field.value
+                    }
                     onChange={e => {
+                      // Handle money type formatting
+                      if (type === "money") {
+                        const value = e.target.value.replace(/^Rp\s*/, ""); // Remove Rp prefix if present
+                        const formattedValue = formatMoneyInput(value);
+                        field.onChange(formattedValue);
+                      }
                       // Handle number type conversion
-                      if (type === "number") {
+                      else if (type === "number") {
                         const value = e.target.value;
                         field.onChange(value === "" ? "" : Number(value));
                       } else {
@@ -134,12 +149,11 @@ export default function FormInput<T extends FieldValues>({
                       }
                     }}
                     onKeyDown={e => {
-                      // Only allow numbers, backspace, delete, tab, escape, enter, and arrow keys for number inputs
-                      if (type === "number") {
-                        const target = e.target as HTMLInputElement;
+                      // Allow money formatting keys for money and number inputs
+                      if (type === "money" || type === "number") {
                         if (
                           !(
-                            (e.key >= "0" && e.key <= "9") ||
+                            (e.key >= "0" && e.key <= "9") || // Allow all digits 0-9
                             e.key === "Backspace" ||
                             e.key === "Delete" ||
                             e.key === "Tab" ||
@@ -149,7 +163,6 @@ export default function FormInput<T extends FieldValues>({
                             e.key === "ArrowRight" ||
                             e.key === "ArrowUp" ||
                             e.key === "ArrowDown" ||
-                            (e.key === "." && !target.value.includes(".")) ||
                             (e.ctrlKey &&
                               (e.key === "a" ||
                                 e.key === "c" ||

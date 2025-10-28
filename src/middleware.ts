@@ -27,7 +27,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Your custom logic goes here
+  // Redirect root path to job-list
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/job-list", request.url));
+  }
+
   return NextResponse.next(); // Continue the request
 }
 
