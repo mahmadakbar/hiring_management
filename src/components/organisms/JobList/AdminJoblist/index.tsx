@@ -7,7 +7,7 @@ import CardListJobs from "@components/molecules/Card/CardListJobs";
 import { useRouter } from "next/navigation";
 
 type AdminJoblistProps = Readonly<{
-  onCreateJobClick?: () => void;
+  onCreateJobClick?: (id?: string) => void;
 }>;
 
 export default function AdminJoblist({ onCreateJobClick }: AdminJoblistProps) {
@@ -70,6 +70,7 @@ export default function AdminJoblist({ onCreateJobClick }: AdminJoblistProps) {
               onManageClick={() => {
                 router.push(`/job-list/${job.id}`);
               }}
+              onClick={() => onCreateJobClick?.(job.id)}
             />
           ))}
         </div>

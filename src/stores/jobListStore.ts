@@ -6,7 +6,11 @@ import { FormJobOpeningData } from "@interfaces/forms";
 interface JobListStore {
   jobs: IJobPosting[];
   addJob: (job: FormJobOpeningData, status?: TJobStatus) => void;
-  updateJobStatus: (id: string, status: TJobStatus) => void;
+  updateJob: (
+    id: string,
+    data: Partial<FormJobOpeningData>,
+    status?: TJobStatus
+  ) => void;
   deleteJob: (id: string) => void;
   getJobById: (id: string) => IJobPosting | undefined;
 }
@@ -35,11 +39,45 @@ export const useJobListStore = create<JobListStore>()(
         }));
       },
 
-      updateJobStatus: (id: string, status: TJobStatus) => {
+      updateJob: (
+        id: string,
+        data: Partial<FormJobOpeningData>,
+        status?: TJobStatus
+      ) => {
         set(state => ({
-          jobs: state.jobs.map(job =>
-            job.id === id ? { ...job, status } : job
-          ),
+          jobs: state.jobs.map(job => {
+            if (job.id === id) {
+              // Create a copy of the data and process salary fields
+              const { minimumSalary, maximumSalary, ...rest } = data;
+
+              const updatedData: Partial<IJobPosting> = {
+                ...rest,
+              };
+
+              // Convert minimumSalary from string to number if provided
+              if (minimumSalary !== undefined) {
+                updatedData.minimumSalary =
+                  typeof minimumSalary === "string" && minimumSalary
+                    ? Number(minimumSalary.replace(/\D/g, ""))
+                    : null;
+              }
+
+              // Convert maximumSalary from string to number if provided
+              if (maximumSalary !== undefined) {
+                updatedData.maximumSalary =
+                  typeof maximumSalary === "string" && maximumSalary
+                    ? Number(maximumSalary.replace(/\D/g, ""))
+                    : null;
+              }
+
+              return {
+                ...job,
+                ...updatedData,
+                ...(status ? { status } : {}),
+              };
+            }
+            return job;
+          }),
         }));
       },
 

@@ -9,7 +9,7 @@ import {
 } from "@components/atoms/breadcrumb";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { mappingBreadcrumbs } from "@utils/list";
+import { mappingBreadcrumbs } from "@utils";
 
 export default function HeaderBreadCrumb() {
   const pathname = usePathname();

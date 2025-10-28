@@ -8,6 +8,7 @@ type CardListJobsProps = Readonly<{
   status: "active" | "inactive" | "draft";
   startedDate: string;
   onManageClick?: () => void;
+  onClick?: () => void;
 }>;
 
 export default function CardListJobs({
@@ -16,6 +17,7 @@ export default function CardListJobs({
   status,
   startedDate,
   onManageClick,
+  onClick,
 }: CardListJobsProps) {
   const getStatusStyles = () => {
     switch (status) {
@@ -35,7 +37,10 @@ export default function CardListJobs({
   };
 
   return (
-    <Card className="bg-card flex w-full flex-row justify-between rounded-2xl border-0 p-6 shadow-sm">
+    <Card
+      className="bg-card flex w-full cursor-pointer flex-row justify-between rounded-2xl border-0 p-6 shadow-sm transition-all hover:shadow-md"
+      onClick={onClick}
+    >
       <div className="flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">
           <div
@@ -61,7 +66,10 @@ export default function CardListJobs({
         <Button
           variant="secondary"
           size="lg"
-          onClick={onManageClick}
+          onClick={e => {
+            e.stopPropagation();
+            onManageClick?.();
+          }}
           className="rounded-lg px-4 py-1 text-xs font-bold text-white"
         >
           Manage Job

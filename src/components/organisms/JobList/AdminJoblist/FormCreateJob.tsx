@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormJobOpeningData } from "@interfaces/forms";
 import jobOpeningSchema from "@lib/schema/jobFormSchema";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { Form } from "@components/atoms/form";
 import {
@@ -10,19 +10,24 @@ import {
   FormProfileRequirement,
 } from "@components/molecules/Form";
 import { Button } from "@components/atoms/button";
+import { Switch } from "@components/atoms/switch";
+import { Label } from "@components/atoms/label";
 import { jobTypeOptions, profileInfo } from "./listData";
 import { useJobListStore } from "@stores/jobListStore";
 import LoadingSpinner from "@components/atoms/loading";
 import { toast } from "@components/atoms/sonner";
 import { SaveIcon } from "lucide-react";
+import { formatMoneyInput } from "@utils/helper";
 
 type FormCreateJobProps = Readonly<{
+  jobId?: string;
   onFinish?: () => void;
 }>;
 
-export default function FormCreateJob({ onFinish }: FormCreateJobProps) {
-  const { addJob } = useJobListStore();
+export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
+  const { addJob, getJobById, updateJob } = useJobListStore();
   const [loading, setLoading] = React.useState(false);
+  const [isActive, setIsActive] = React.useState(true);
 
   const form = useForm<FormJobOpeningData>({
     resolver: zodResolver(jobOpeningSchema) as any,
@@ -47,11 +52,43 @@ export default function FormCreateJob({ onFinish }: FormCreateJobProps) {
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (jobId) {
+      const jobData = getJobById(jobId);
+      if (jobData) {
+        form.reset({
+          jobName: jobData.jobName,
+          jobType: jobData.jobType,
+          jobDescription: jobData.jobDescription,
+          numberOfCandidatesNeeded:
+            jobData.numberOfCandidatesNeeded || undefined,
+          minimumSalary: jobData.minimumSalary
+            ? formatMoneyInput(jobData.minimumSalary.toString())
+            : null,
+          maximumSalary: jobData.maximumSalary
+            ? formatMoneyInput(jobData.maximumSalary.toString())
+            : null,
+          minimumProfileInformation: jobData.minimumProfileInformation,
+        });
+        setIsActive(jobData.status === "active");
+      }
+    }
+  }, [jobId, getJobById, form]);
+
   const onSubmit = (data: FormJobOpeningData) => {
     setLoading(true);
-    addJob(data);
 
-    console.log("Job successfully published with status: active", data);
+    if (jobId) {
+      updateJob(jobId, data, isActive ? "active" : "inactive");
+    } else {
+      addJob(data, isActive ? "active" : "inactive");
+    }
+
+    console.log(
+      "Job successfully published with status:",
+      isActive ? "active" : "inactive",
+      data
+    );
 
     setTimeout(() => {
       form.reset();
@@ -70,7 +107,12 @@ export default function FormCreateJob({ onFinish }: FormCreateJobProps) {
       return;
     }
 
-    addJob(data, "draft");
+    if (jobId) {
+      updateJob(jobId, data, "draft");
+    } else {
+      addJob(data, "draft");
+    }
+
     toast.success("Job vacancy saved as draft");
     onFinish?.();
   };
@@ -172,11 +214,22 @@ export default function FormCreateJob({ onFinish }: FormCreateJobProps) {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end gap-4 pt-4">
+            {/* Toggle Switch */}
+            <div className="flex items-center justify-between gap-2.5">
+              <Label htmlFor="job-status" className="text-sm font-medium">
+                {isActive ? "Active" : "Inactive"}
+              </Label>
+              <Switch
+                id="job-status"
+                checked={isActive}
+                onCheckedChange={setIsActive}
+              />
+            </div>
             <Button
               type="button"
               variant="outline"
-              className="mr-4 rounded-lg px-6 py-2.5 text-sm font-semibold"
+              className="rounded-lg px-6 py-2.5 text-sm font-semibold"
               onClick={handleSaveDraft}
               disabled={loading}
             >

@@ -8,10 +8,14 @@ import { useState } from "react";
 
 export default function JobListTemplate() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
+    undefined
+  );
 
-  const handleCreateJob = () => {
+  const handleCreateJob = (id?: string) => {
     console.log("Create Job button clicked");
     setIsPopupOpen(true);
+    setSelectedJobId(id);
   };
 
   return (
@@ -25,7 +29,15 @@ export default function JobListTemplate() {
       <PopupCreateJob
         open={isPopupOpen}
         onOpenChange={setIsPopupOpen}
-        content={<FormCreateJob onFinish={() => setIsPopupOpen(false)} />}
+        content={
+          <FormCreateJob
+            jobId={selectedJobId}
+            onFinish={() => {
+              setIsPopupOpen(false);
+              setSelectedJobId(undefined);
+            }}
+          />
+        }
       />
     </div>
   );
