@@ -12,28 +12,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@components/atoms/popover";
+import { Icon } from "@iconify/react";
 import { cn } from "@utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronDown } from "lucide-react";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 
 interface FormCalendarProps<T extends FieldValues> {
-  readonly form: {
-    readonly control: Control<T>;
+  form: {
+    control: Control<T>;
   };
-  readonly name: FieldPath<T>;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly disabled?: boolean;
-  readonly className?: string;
-  readonly classNameLabel?: string;
-  readonly dateFormat?: string;
-  readonly fromDate?: Date;
-  readonly toDate?: Date;
-  readonly mode?: "single" | "multiple" | "range";
-  readonly startYear?: number;
-  readonly endYear?: number;
-  readonly showMonthYearDropdowns?: boolean;
+  name: FieldPath<T>;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  classNameLabel?: string;
+  dateFormat?: string;
+  fromDate?: Date;
+  toDate?: Date;
+  mode?: "single" | "multiple" | "range";
+  startYear?: number;
+  endYear?: number;
+  showMonthYearDropdowns?: boolean;
 }
 
 export default function FormCalendar<T extends FieldValues>({
@@ -122,7 +123,14 @@ export default function FormCalendar<T extends FieldValues>({
         return (
           <FormItem className="flex flex-col">
             {label && (
-              <FormLabel className={cn("", classNameLabel)}>{label}</FormLabel>
+              <FormLabel
+                className={cn(
+                  "text-font-natural text-xs font-normal",
+                  classNameLabel
+                )}
+              >
+                {label}
+              </FormLabel>
             )}
             <Popover>
               <PopoverTrigger asChild>
@@ -131,13 +139,20 @@ export default function FormCalendar<T extends FieldValues>({
                     variant="ghost"
                     disabled={disabled}
                     className={cn(
-                      "placeholder:text-font-hilight border-line flex h-14 w-full justify-start rounded-2xl border bg-white px-6 py-4 text-left text-base font-semibold text-gray-900 transition-all duration-200 hover:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-                      !field.value && "text-font-hilight font-normal",
+                      "placeholder:text-font-placeholder border-line hover:bg-accent-foreground flex h-10 w-full justify-start rounded-lg border-2 bg-white px-4 py-4 text-left text-sm font-normal text-gray-900 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                      !field.value &&
+                        "text-font-placeholder hover:text-font-natural font-normal",
                       className
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {getDisplayValue(field.value)}
+                    <Icon
+                      icon="cuida:calendar-outline"
+                      className="text-font-primary mr-1 h-4 w-4"
+                    />
+                    <span className="w-full truncate">
+                      {getDisplayValue(field.value)}
+                    </span>
+                    <ChevronDown className="text-font-primary ml-2 h-4 w-4" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
@@ -151,7 +166,7 @@ export default function FormCalendar<T extends FieldValues>({
                   startMonth={new Date(startYear, 0)}
                   endMonth={new Date(endYear, 11)}
                   mode="single"
-                  className="w-[var(--radix-popover-trigger-width)] rounded-md border bg-white shadow-sm"
+                  className="min-w-[300px] rounded-md border bg-white shadow-sm"
                 />
               </PopoverContent>
             </Popover>

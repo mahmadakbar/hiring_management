@@ -1,12 +1,6 @@
 import React from "react";
 
-interface GoogleLogoProps {
-  width?: number;
-  height?: number;
-  className?: string;
-}
-
-const GoogleLogo: React.FC<GoogleLogoProps> = ({
+const GoogleLogo: React.FC<IconProps> = ({
   width = 25,
   height = 24,
   className = "",

@@ -1,4 +1,4 @@
-import { cn } from "@utils/cn";
+import { cn } from "@utils";
 
 type BackgroundProps = {
   children?: React.ReactNode;

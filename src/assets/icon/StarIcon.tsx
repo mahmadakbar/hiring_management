@@ -1,13 +1,6 @@
 import React from "react";
 
-interface StarIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const StarIcon: React.FC<StarIconProps> = ({
+const StarIcon: React.FC<IconProps> = ({
   width = 12,
   height = 14,
   className = "",

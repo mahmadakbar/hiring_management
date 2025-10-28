@@ -17,7 +17,7 @@ import { useJobListStore } from "@stores/jobListStore";
 import LoadingSpinner from "@components/atoms/loading";
 import { toast } from "@components/atoms/sonner";
 import { SaveIcon } from "lucide-react";
-import { formatMoneyInput } from "@utils/helper";
+import { formatMoneyInput } from "@utils";
 
 type FormCreateJobProps = Readonly<{
   jobId?: string;
@@ -118,98 +118,100 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
   };
 
   return (
-    <div className="max-h-[calc(100vh-10rem)] w-full overflow-y-auto px-6">
+    <div className="w-full overflow-y-auto px-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Job Name */}
-          <FormInput
-            form={form}
-            name="jobName"
-            label="Job Name*"
-            placeholder="Ex. Front End Engineer"
-          />
+          <div className="max-h-[calc(100vh-13rem)] overflow-y-auto">
+            <FormInput
+              form={form}
+              name="jobName"
+              label="Job Name*"
+              placeholder="Ex. Front End Engineer"
+            />
 
-          {/* Job Type */}
-          <FormDropDown
-            form={form}
-            name="jobType"
-            label="Job Type*"
-            placeholder="Select job type"
-            options={jobTypeOptions}
-            searchable={false}
-          />
+            {/* Job Type */}
+            <FormDropDown
+              form={form}
+              name="jobType"
+              label="Job Type*"
+              placeholder="Select job type"
+              options={jobTypeOptions}
+              searchable={false}
+            />
 
-          {/* Job Description */}
-          <FormInput
-            form={form}
-            name="jobDescription"
-            label="Job Description*"
-            placeholder="Ex."
-            type="textarea"
-          />
+            {/* Job Description */}
+            <FormInput
+              form={form}
+              name="jobDescription"
+              label="Job Description*"
+              placeholder="Ex."
+              type="textarea"
+            />
 
-          {/* Number of Candidates Needed */}
-          <FormInput
-            form={form}
-            name="numberOfCandidatesNeeded"
-            label="Number of Candidate Needed*"
-            placeholder="Ex. 2"
-            type="number"
-          />
+            {/* Number of Candidates Needed */}
+            <FormInput
+              form={form}
+              name="numberOfCandidatesNeeded"
+              label="Number of Candidate Needed*"
+              placeholder="Ex. 2"
+              type="number"
+            />
 
-          {/* Job Salary */}
-          <div
-            className="space-y-4 pt-6"
-            style={{
-              borderTop: "1px dashed #d1d5db",
-              borderImage:
-                "repeating-linear-gradient(to right, #d1d5db 0, #d1d5db 10px, transparent 10px, transparent 20px) 1",
-            }}
-          >
-            <p className="text-sm font-normal text-gray-700">Job Salary</p>
-            <div className="grid grid-cols-2 gap-4">
-              <FormInput
-                form={form}
-                name="minimumSalary"
-                label="Minimum Estimated Salary"
-                placeholder="7.000.000"
-                type="money"
-                additionalInfo="Rp"
-                maxLength={12}
-              />
-              <FormInput
-                form={form}
-                name="maximumSalary"
-                label="Maximum Estimated Salary"
-                placeholder="8.000.000"
-                type="money"
-                additionalInfo="Rp"
-                maxLength={12}
-              />
-            </div>
-          </div>
-
-          {/* Minimum Profile Information Required */}
-          <div className="border-border-secondary flex flex-col gap-4 space-y-4 rounded-xl border p-4">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Minimum Profile Information Required
-            </h3>
-
-            <div className="p-2">
-              {profileInfo.map(profile => (
-                <FormProfileRequirement
-                  key={profile.value}
+            {/* Job Salary */}
+            <div
+              className="space-y-4 pt-6"
+              style={{
+                borderTop: "1px dashed #E0E0E0",
+                borderImage:
+                  "repeating-linear-gradient(to right, #E0E0E0 0, #E0E0E0 10px, transparent 10px, transparent 20px) 1",
+              }}
+            >
+              <p className="text-sm font-normal text-gray-700">Job Salary</p>
+              <div className="grid grid-cols-2 gap-4">
+                <FormInput
                   form={form}
-                  name={
-                    `minimumProfileInformation.${profile.value}` as keyof FormJobOpeningData
-                  }
-                  label={profile.label}
-                  allowedOptions={
-                    profile.option as ("mandatory" | "optional" | "off")[]
-                  }
-                  className="border-border-secondary border-b py-4 last:border-b-0 last:pb-0"
+                  name="minimumSalary"
+                  label="Minimum Estimated Salary"
+                  placeholder="7.000.000"
+                  type="money"
+                  additionalInfo="Rp"
+                  maxLength={12}
                 />
-              ))}
+                <FormInput
+                  form={form}
+                  name="maximumSalary"
+                  label="Maximum Estimated Salary"
+                  placeholder="8.000.000"
+                  type="money"
+                  additionalInfo="Rp"
+                  maxLength={12}
+                />
+              </div>
+            </div>
+
+            {/* Minimum Profile Information Required */}
+            <div className="border-border-secondary flex flex-col gap-4 space-y-4 rounded-xl border p-4">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Minimum Profile Information Required
+              </h3>
+
+              <div className="p-2">
+                {profileInfo.map(profile => (
+                  <FormProfileRequirement
+                    key={profile.value}
+                    form={form}
+                    name={
+                      `minimumProfileInformation.${profile.value}` as keyof FormJobOpeningData
+                    }
+                    label={profile.label}
+                    allowedOptions={
+                      profile.option as ("mandatory" | "optional" | "off")[]
+                    }
+                    className="border-border-secondary border-b py-4 last:border-b-0 last:pb-0"
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -239,7 +241,7 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
             <Button
               type="submit"
               disabled={!form.formState.isValid || loading}
-              className="rounded-lg px-6 py-2.5 text-sm font-semibold"
+              className="bg-secondary hover:bg-secondary-hover rounded-lg px-6 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <LoadingSpinner showText={false} size="sm" className="w-10" />

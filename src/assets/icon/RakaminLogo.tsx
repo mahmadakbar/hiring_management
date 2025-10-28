@@ -1,12 +1,6 @@
 import React from "react";
 
-interface RakaminLogoProps {
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
-const RakaminLogo: React.FC<RakaminLogoProps> = ({
+const RakaminLogo: React.FC<IconProps> = ({
   width = 145,
   height = 50,
   className = "",

@@ -1,14 +1,6 @@
 import React from "react";
 
-interface UploadIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-  opacity?: number;
-}
-
-const UploadIcon: React.FC<UploadIconProps> = ({
+const UploadIcon: React.FC<IconProps> = ({
   width = 84,
   height = 76,
   className = "",

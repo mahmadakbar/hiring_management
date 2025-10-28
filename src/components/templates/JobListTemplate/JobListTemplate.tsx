@@ -4,6 +4,7 @@ import CardBackground from "@components/molecules/Card/CardBackground";
 import { PopupCreateJob } from "@components/molecules/Popup";
 import AdminJoblist from "@components/organisms/JobList/AdminJoblist";
 import FormCreateJob from "@components/organisms/JobList/AdminJoblist/FormCreateJob";
+import CandidateJoblist from "@components/organisms/JobList/CandidateJoblist";
 import { useState } from "react";
 
 export default function JobListTemplate() {
@@ -20,7 +21,9 @@ export default function JobListTemplate() {
 
   return (
     <div className="flex w-full gap-6">
-      <AdminJoblist onCreateJobClick={handleCreateJob} />
+      <CandidateJoblist />
+
+      {/* <AdminJoblist onCreateJobClick={handleCreateJob} />
 
       <div className="sticky top-6 self-start">
         <CardBackground onClickButton={handleCreateJob} />
@@ -38,7 +41,7 @@ export default function JobListTemplate() {
             }}
           />
         }
-      />
+      /> */}
     </div>
   );
 }

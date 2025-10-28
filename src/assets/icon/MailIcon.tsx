@@ -1,13 +1,6 @@
 import React from "react";
 
-interface KeyIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const KeyIcon: React.FC<KeyIconProps> = ({
+const KeyIcon: React.FC<IconProps> = ({
   width = 16,
   height = 16,
   className = "",

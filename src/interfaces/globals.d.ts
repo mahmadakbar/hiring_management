@@ -10,6 +10,14 @@ declare global {
     error: Error & { digest?: string };
     reset: () => void;
   }>;
+
+  interface IconProps {
+    width?: number;
+    height?: number;
+    className?: string;
+    fill?: string;
+    opacity?: number;
+  }
 }
 
 // NextAuth type extensions

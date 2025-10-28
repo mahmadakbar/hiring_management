@@ -1,13 +1,6 @@
 import React from "react";
 
-interface SuccessIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const SuccessIcon: React.FC<SuccessIconProps> = ({
+const SuccessIcon: React.FC<IconProps> = ({
   width = 120,
   height = 120,
   className = "",

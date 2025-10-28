@@ -18,6 +18,7 @@ type DialogContentProps = React.ComponentPropsWithoutRef<
   typeof DialogPrimitive.Content
 > & {
   hasClose?: boolean;
+  closeClassName?: string;
 };
 
 const DialogOverlay = React.forwardRef<
@@ -38,7 +39,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, hasClose = true, ...props }, ref) => (
+>(({ className, closeClassName, children, hasClose = true, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -51,8 +52,13 @@ const DialogContent = React.forwardRef<
     >
       {children}
       {hasClose && (
-        <DialogPrimitive.Close className="data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 disabled:pointer-events-none">
-          <X className="h-4 w-4" />
+        <DialogPrimitive.Close
+          className={cn(
+            "data-[state=open]:bg-accent data-[state=open]:text-muted-foreground item-center focus:ring-ring absolute top-4 right-4 cursor-pointer justify-center rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none",
+            closeClassName
+          )}
+        >
+          <X className={"h-4 w-4"} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}
@@ -66,10 +72,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
+    className={cn("flex flex-col text-center sm:text-left", className)}
     {...props}
   />
 );

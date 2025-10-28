@@ -10,7 +10,7 @@ import {
 import { Input } from "@components/atoms/input";
 import { cn } from "@utils";
 import { Eye, EyeOff } from "lucide-react";
-import { formatMoneyInput } from "@utils/helper";
+import { formatMoneyInput } from "@utils";
 
 import { useState } from "react";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
@@ -28,19 +28,20 @@ type InputType =
   | "textarea";
 
 interface FormInputProps<T extends FieldValues> {
-  readonly form: {
-    readonly control: Control<T>;
+  form: {
+    control: Control<T>;
   };
-  readonly name: FieldPath<T>;
-  readonly label?: string;
-  readonly placeholder: string;
-  readonly type?: InputType;
-  readonly disabled?: boolean;
-  readonly className?: string;
-  readonly classNameLabel?: string;
-  readonly additionalInfo?: string;
-  readonly maxLength?: number;
-  readonly value?: string | number;
+  name: FieldPath<T>;
+  label?: string;
+  placeholder: string;
+  type?: InputType;
+  disabled?: boolean;
+  className?: string;
+  classNameLabel?: string;
+  additionalInfo?: string;
+  maxLength?: number;
+  value?: string | number;
+  classNameInfo?: string;
 }
 
 export default function FormInput<T extends FieldValues>({
@@ -55,6 +56,7 @@ export default function FormInput<T extends FieldValues>({
   additionalInfo,
   maxLength,
   value,
+  classNameInfo,
 }: Readonly<FormInputProps<T>>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordType = type === "password";
@@ -95,7 +97,12 @@ export default function FormInput<T extends FieldValues>({
             <FormControl>
               <div className="relative flex">
                 {additionalInfo && (
-                  <span className="text-font-primary absolute top-1/2 left-4 -translate-y-1/2 transform text-sm font-bold">
+                  <span
+                    className={cn(
+                      "text-font-primary absolute left-4 flex h-full transform items-center text-sm font-bold",
+                      classNameInfo
+                    )}
+                  >
                     {additionalInfo}
                   </span>
                 )}
@@ -144,13 +151,24 @@ export default function FormInput<T extends FieldValues>({
                       else if (type === "number") {
                         const value = e.target.value;
                         field.onChange(value === "" ? "" : Number(value));
+                      }
+                      // Handle tel type - prevent leading zero
+                      else if (type === "tel") {
+                        let value = e.target.value;
+                        // Remove all leading zeros
+                        value = value.replace(/^0+/, "");
+                        field.onChange(value);
                       } else {
                         field.onChange(e.target.value);
                       }
                     }}
                     onKeyDown={e => {
                       // Allow money formatting keys for money and number inputs
-                      if (type === "money" || type === "number") {
+                      if (
+                        type === "money" ||
+                        type === "number" ||
+                        type === "tel"
+                      ) {
                         if (
                           !(
                             (e.key >= "0" && e.key <= "9") || // Allow all digits 0-9

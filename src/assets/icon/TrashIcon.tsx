@@ -1,13 +1,6 @@
 import React from "react";
 
-interface TrashIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const TrashIcon: React.FC<TrashIconProps> = ({
+const TrashIcon: React.FC<IconProps> = ({
   width = 12,
   height = 14,
   className = "",

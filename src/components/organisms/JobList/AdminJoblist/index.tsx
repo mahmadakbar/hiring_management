@@ -5,6 +5,7 @@ import { Input } from "@components/atoms/input";
 import { useJobListStore } from "@stores/jobListStore";
 import CardListJobs from "@components/molecules/Card/CardListJobs";
 import { useRouter } from "next/navigation";
+import { formatSalaryRange } from "@utils";
 
 type AdminJoblistProps = Readonly<{
   onCreateJobClick?: (id?: string) => void;
@@ -13,26 +14,6 @@ type AdminJoblistProps = Readonly<{
 export default function AdminJoblist({ onCreateJobClick }: AdminJoblistProps) {
   const router = useRouter();
   const { jobs } = useJobListStore();
-
-  const formatSalaryRange = (
-    minSalary?: number | null,
-    maxSalary?: number | null
-  ) => {
-    if (!minSalary && !maxSalary) return "Salary not specified";
-
-    const formatCurrency = (value: number) => {
-      return `Rp${value.toLocaleString("id-ID")}`;
-    };
-
-    if (minSalary && maxSalary) {
-      return `${formatCurrency(minSalary)} - ${formatCurrency(maxSalary)}`;
-    }
-
-    if (minSalary) return `From ${formatCurrency(minSalary)}`;
-    if (maxSalary) return `Up to ${formatCurrency(maxSalary)}`;
-
-    return "Salary not specified";
-  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-GB", {

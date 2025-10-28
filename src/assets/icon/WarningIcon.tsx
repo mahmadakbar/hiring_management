@@ -1,13 +1,6 @@
 import React from "react";
 
-interface WarningIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const WarningIcon: React.FC<WarningIconProps> = ({
+const WarningIcon: React.FC<IconProps> = ({
   width = 16,
   height = 16,
   className = "",

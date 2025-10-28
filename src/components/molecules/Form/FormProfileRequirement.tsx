@@ -10,13 +10,13 @@ import { Control, FieldPath, FieldValues } from "react-hook-form";
 type RequirementOption = "mandatory" | "optional" | "off";
 
 interface FormProfileRequirementProps<T extends FieldValues> {
-  readonly form: {
-    readonly control: Control<T>;
+  form: {
+    control: Control<T>;
   };
-  readonly name: FieldPath<T>;
-  readonly label: string;
-  readonly className?: string;
-  readonly allowedOptions?: RequirementOption[];
+  name: FieldPath<T>;
+  label: string;
+  className?: string;
+  allowedOptions?: RequirementOption[];
 }
 
 export default function FormProfileRequirement<T extends FieldValues>({

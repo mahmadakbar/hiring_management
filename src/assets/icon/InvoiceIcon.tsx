@@ -1,13 +1,6 @@
 import React from "react";
 
-interface InvoiceIconProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  fill?: string;
-}
-
-const InvoiceIcon: React.FC<InvoiceIconProps> = ({
+const InvoiceIcon: React.FC<IconProps> = ({
   width = 100,
   height = 100,
   className = "",

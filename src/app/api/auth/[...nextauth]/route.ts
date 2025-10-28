@@ -2,7 +2,7 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   NEXTAUTH_SECRET,
-} from "@utils/env";
+} from "@utils";
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 

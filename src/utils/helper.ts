@@ -119,12 +119,41 @@ const parseDate = (dateString: string): Date | undefined => {
   return undefined;
 };
 
+const formatSalaryRange = (
+  minSalary?: number | null,
+  maxSalary?: number | null
+) => {
+  if (!minSalary && !maxSalary) return "Salary not specified";
+
+  const formatCurrency = (value: number) => {
+    return `Rp${value.toLocaleString("id-ID")}`;
+  };
+
+  if (minSalary && maxSalary) {
+    return `${formatCurrency(minSalary)} - ${formatCurrency(maxSalary)}`;
+  }
+
+  if (minSalary) return `From ${formatCurrency(minSalary)}`;
+  if (maxSalary) return `Up to ${formatCurrency(maxSalary)}`;
+
+  return "Salary not specified";
+};
+
+const capitalize = (text: string): string => {
+  return text
+    .split("-")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("-");
+};
+
 export {
   truncateMiddle,
   getFileTypeColor,
   formatMoney,
+  formatSalaryRange,
   parseMoney,
   formatMoneyInput,
   mapKeysDeep,
   parseDate,
+  capitalize,
 };

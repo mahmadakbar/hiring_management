@@ -14,9 +14,9 @@ import { useState, useCallback } from "react";
 import { getFileTypeColor } from "@utils";
 
 interface FormUploadProps<T extends FieldValues> {
-  readonly control: Control<T>;
-  readonly data: File[];
-  readonly name: FieldPath<T>;
+  control: Control<T>;
+  data: File[];
+  name: FieldPath<T>;
 }
 
 export default function FormUpload<T extends FieldValues>({

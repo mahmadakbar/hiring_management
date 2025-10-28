@@ -8,3 +8,7 @@ export { default as SuccessIcon } from "./SuccessIcon";
 export { default as KeyIcon } from "./KeyIcon";
 export { default as MailIcon } from "./MailIcon";
 export { default as WarningIcon } from "./WarningIcon";
+export { default as LocationIcon } from "./LocationIcon";
+export { default as HandOne } from "./HandOne";
+export { default as HandTwo } from "./HandTwo";
+export { default as HandThree } from "./HandThree";
