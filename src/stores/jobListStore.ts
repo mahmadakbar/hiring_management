@@ -21,9 +21,11 @@ export const useJobListStore = create<JobListStore>()(
       jobs: [],
 
       addJob: (job: FormJobOpeningData, status?: TJobStatus) => {
+        const id = crypto.randomUUID();
         const newJob: IJobPosting = {
           ...job,
-          id: crypto.randomUUID(),
+          id,
+          jobId: id,
           createdAt: new Date(),
           status: status || "active",
           minimumSalary: job.minimumSalary
