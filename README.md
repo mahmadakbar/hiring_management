@@ -390,7 +390,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ### 🗃️ Database Schema
 
-
+<img width="1170" height="1316" alt="supabase-schema-yhthnwtjhdkspxtpjjuu" src="https://github.com/user-attachments/assets/673cd127-52ba-4348-89fe-0cb1614d83bc" />
 
 
 ## 📜 Available Scripts
