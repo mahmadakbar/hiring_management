@@ -1,11 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getSession, signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { GoogleLogo, KeyIcon, MailIcon } from "@assets/icon";
 import { Button } from "@components/atoms/button";
@@ -13,11 +11,17 @@ import { Form } from "@components/atoms/form";
 import { FormLoginData } from "@interfaces/forms";
 import { loginSchema } from "@lib/schema/authSchema";
 import { FormInput } from "@components/molecules/Form";
+import { useCheckEmail, useLogin } from "@services/mutation/authMutation";
+import { toast } from "@components/atoms/sonner";
 
 export default function FormLogin() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [usePassword, setUsePassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { mutateAsync: checkEmail, isPending: isCheckingEmail } =
+    useCheckEmail();
+  const { mutateAsync: login, isPending: isLoggingIn } = useLogin();
 
   const form = useForm<FormLoginData>({
     resolver: zodResolver(loginSchema),
@@ -33,19 +37,16 @@ export default function FormLogin() {
       setIsLoading(true);
 
       const result = await signIn("google", {
-        callbackUrl: "/",
+        callbackUrl: "/job-list",
         redirect: false,
       });
 
       if (result?.error) {
         toast.error("Failed to sign in with Google. Please try again.");
       } else if (result?.ok) {
-        // Check if user is authenticatedW
-        const session = await getSession();
-        if (session) {
-          toast.success("Successfully signed in!");
-          router.push("/");
-        }
+        toast.success("Successfully signed in!");
+        // Use window.location for full page refresh
+        window.location.href = result?.url || "/job-list";
       }
     } catch (error) {
       toast.error("An unexpected error occurred. Please try again.");
@@ -56,14 +57,42 @@ export default function FormLogin() {
   };
 
   // Handle form submission (for email/password login if you want to implement it)
-  function onSubmit(values: FormLoginData) {
-    // For now, just log the values
-    // You can implement email/password authentication here if needed
-    console.log("Form values:", values);
-    toast.info(
-      "Email/password login not implemented yet. Please use Google sign in."
-    );
+  async function onSubmit(values: FormLoginData) {
+    try {
+      if (!values.password) {
+        toast.error("Password is required");
+        return;
+      }
+
+      await login({
+        email: values.email,
+        password: values.password,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+        setErrorMessage("Username atau password salah, silakan coba lagi");
+      } else {
+        toast.error("Terjadi kesalahan yang tidak terduga");
+      }
+    }
   }
+
+  const handleCheckEmail = async () => {
+    const email = form.watch("email");
+    console.log("Form values:", email);
+    try {
+      setIsLoading(true);
+      // Check if email exists in Supabase using mutation
+      await checkEmail(email);
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex h-full w-full min-w-[500px] bg-white p-10 shadow-sm backdrop-blur-sm">
@@ -85,6 +114,12 @@ export default function FormLogin() {
             </p>
           </div>
 
+          {errorMessage && (
+            <div className="border-destructive bg-destructive-foreground mb-4 rounded-md border p-3">
+              <p className="text-destructive text-xs">{errorMessage}</p>
+            </div>
+          )}
+
           <FormInput
             form={form}
             name="email"
@@ -104,19 +139,24 @@ export default function FormLogin() {
           )}
 
           <div className="flex w-full flex-col gap-4">
-            <Button
-              type="submit"
-              className="h-auto rounded-lg py-2 text-base font-semibold"
-              disabled={isLoading}
-            >
-              {isLoading
-                ? usePassword
-                  ? "Masuk..."
-                  : "Mengirim..."
-                : usePassword
-                  ? "Masuk"
-                  : "Kirim link"}
-            </Button>
+            {usePassword ? (
+              <Button
+                type="submit"
+                className="h-auto rounded-lg py-2 text-base font-semibold"
+                disabled={isLoading || isCheckingEmail || isLoggingIn}
+              >
+                {isLoggingIn ? "Masuk..." : "Masuk"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="h-auto rounded-lg py-2 text-base font-semibold"
+                disabled={isLoading || isCheckingEmail || isLoggingIn}
+                onClick={() => handleCheckEmail()}
+              >
+                {isLoading || isCheckingEmail ? "Mengirim..." : "Kirim link"}
+              </Button>
+            )}
 
             <div className="flex h-5 w-full items-center">
               <span className="bg-border-grey m-auto h-px w-full" />
@@ -130,7 +170,7 @@ export default function FormLogin() {
               type="button"
               variant="outline"
               onClick={() => setUsePassword(!usePassword)}
-              disabled={isLoading}
+              disabled={isLoading || isCheckingEmail || isLoggingIn}
               className="border-border text-font-primary hover:bg-border/20 flex h-auto items-center justify-center gap-3 rounded-lg bg-transparent px-6 py-3 font-bold shadow-none"
             >
               {usePassword ? <MailIcon /> : <KeyIcon />}
@@ -145,7 +185,7 @@ export default function FormLogin() {
               type="button"
               variant="outline"
               onClick={handleGoogleSignIn}
-              disabled={isLoading}
+              disabled={isLoading || isCheckingEmail || isLoggingIn}
               className="border-border text-font-primary hover:bg-border/20 flex h-auto items-center justify-center gap-3 rounded-lg bg-transparent px-6 py-3 font-bold shadow-none"
             >
               <GoogleLogo width={24} height={24} />

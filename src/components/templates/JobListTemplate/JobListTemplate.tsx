@@ -21,9 +21,9 @@ export default function JobListTemplate() {
 
   return (
     <div className="flex w-full gap-6">
-      <CandidateJoblist />
+      {/* <CandidateJoblist /> */}
 
-      {/* <AdminJoblist onCreateJobClick={handleCreateJob} />
+      <AdminJoblist onCreateJobClick={handleCreateJob} />
 
       <div className="sticky top-6 self-start">
         <CardBackground onClickButton={handleCreateJob} />
@@ -41,7 +41,7 @@ export default function JobListTemplate() {
             }}
           />
         }
-      /> */}
+      />
     </div>
   );
 }

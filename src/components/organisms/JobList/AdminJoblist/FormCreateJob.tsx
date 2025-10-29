@@ -17,7 +17,7 @@ import { useJobListStore } from "@stores/jobListStore";
 import LoadingSpinner from "@components/atoms/loading";
 import { toast } from "@components/atoms/sonner";
 import { SaveIcon } from "lucide-react";
-import { formatMoneyInput } from "@utils";
+import { formatMoneyInput, indonesianCities } from "@utils";
 
 type FormCreateJobProps = Readonly<{
   jobId?: string;
@@ -38,6 +38,7 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
       numberOfCandidatesNeeded: undefined,
       minimumSalary: null,
       maximumSalary: null,
+      location: "",
       minimumProfileInformation: {
         fullName: "mandatory",
         photoProfile: "mandatory",
@@ -156,6 +157,17 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
               label="Number of Candidate Needed*"
               placeholder="Ex. 2"
               type="number"
+            />
+
+            {/* Location */}
+            <FormDropDown
+              form={form}
+              name="location"
+              label="Location*"
+              placeholder="Choose your location"
+              options={indonesianCities}
+              typeToSearch={true}
+              searchable={false}
             />
 
             {/* Job Salary */}

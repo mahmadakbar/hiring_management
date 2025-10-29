@@ -3,32 +3,55 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@components/atoms/sonner";
 
 import { GoogleLogo } from "@assets/icon";
 import { Button } from "@components/atoms/button";
 import { Form } from "@components/atoms/form";
-import { FormLoginData, FormRegisterData } from "@interfaces/forms";
+import { FormRegisterData } from "@interfaces/forms";
 import { registerSchema } from "@lib/schema/authSchema";
 import { FormInput } from "@components/molecules/Form";
+import { useRegister } from "@services/mutation/authMutation";
+import { extractErrorMessage } from "@utils";
+import PasswordRequirements from "@components/molecules/PasswordRequirements";
 
 export default function FormRegister() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { mutateAsync: registerMutate, isPending } = useRegister();
 
   const form = useForm<FormRegisterData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
+      name: "",
+      password: "",
+      confirmPassword: "",
     },
   });
+
+  // Watch password field for requirements display
+  const passwordValue = form.watch("password");
+
+  // Clear error message when user starts typing
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (errorMessage) {
+        setErrorMessage(null);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, errorMessage]);
 
   // Handle Google Sign In
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
+      setErrorMessage(null); // Clear previous errors
 
       const result = await signIn("google", {
         callbackUrl: "/",
@@ -37,6 +60,7 @@ export default function FormRegister() {
 
       if (result?.error) {
         toast.error("Failed to sign in with Google. Please try again.");
+        setErrorMessage("Gagal masuk dengan Google. Silakan coba lagi.");
       } else if (result?.ok) {
         // Check if user is authenticatedW
         const session = await getSession();
@@ -47,20 +71,27 @@ export default function FormRegister() {
       }
     } catch (error) {
       toast.error("An unexpected error occurred. Please try again.");
+      setErrorMessage(
+        "Terjadi kesalahan yang tidak terduga. Silakan coba lagi."
+      );
       console.error("Google sign in error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle form submission (for email/password login if you want to implement it)
-  function onSubmit(values: FormLoginData) {
-    // For now, just log the values
-    // You can implement email/password authentication here if needed
-    console.log("Form values:", values);
-    toast.info(
-      "Email/password login not implemented yet. Please use Google sign in."
-    );
+  async function onSubmit(values: FormRegisterData) {
+    try {
+      setErrorMessage(null);
+      await registerMutate(values);
+      form.reset();
+    } catch (err: any) {
+      let message = extractErrorMessage(err);
+      if (err.status === 409) {
+        message = "Email sudah terdaftar. Silakan gunakan email lain.";
+      }
+      setErrorMessage(message);
+    }
   }
 
   return (
@@ -85,6 +116,12 @@ export default function FormRegister() {
             </p>
           </div>
 
+          {errorMessage && (
+            <div className="border-destructive bg-destructive-foreground mb-4 rounded-md border p-3">
+              <p className="text-destructive text-xs">{errorMessage}</p>
+            </div>
+          )}
+
           <FormInput
             form={form}
             name="email"
@@ -93,13 +130,40 @@ export default function FormRegister() {
             type="email"
           />
 
+          <FormInput
+            form={form}
+            name="name"
+            label="Nama lengkap"
+            placeholder=""
+            type="text"
+          />
+
+          <FormInput
+            form={form}
+            name="password"
+            label="Kata sandi"
+            placeholder=""
+            type="password"
+          />
+
+          {/* Password Requirements Indicator */}
+          <PasswordRequirements password={passwordValue || ""} />
+
+          <FormInput
+            form={form}
+            name="confirmPassword"
+            label="Konfirmasi kata sandi"
+            placeholder=""
+            type="password"
+          />
+
           <div className="flex w-full flex-col gap-4">
             <Button
               type="submit"
               className="bg-button-primary hover:bg-button-primary/90 text-font-natural h-auto rounded-lg py-2 text-base font-semibold"
-              disabled={isLoading}
+              disabled={isLoading || isPending}
             >
-              {isLoading ? "Memproses..." : "Daftar dengan email"}
+              {isLoading || isPending ? "Memproses..." : "Daftar dengan email"}
             </Button>
 
             <div className="flex h-5 w-full items-center">

@@ -6,6 +6,7 @@ export interface IJobPosting {
   numberOfCandidatesNeeded: number | null;
   minimumSalary: number | null;
   maximumSalary: number | null;
+  location: string;
   minimumProfileInformation: {
     fullName: TProfileInfoOption;
     photoProfile: TProfileInfoOption;

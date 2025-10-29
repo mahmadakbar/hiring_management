@@ -1,39 +1,53 @@
-// import { withAuth } from "next-auth/middleware";
-
-// export default withAuth(
-//   function middleware(_req) {
-//     // Additional middleware logic here if needed
-//   },
-//   {
-//     callbacks: {
-//       authorized: ({ token, req }) => {
-//         // Define which routes require authentication
-//         const { pathname } = req.nextUrl;
-//         // Public routes that don't require authentication
-//         const publicRoutes = ["/login", "/register", "/"];
-//         // If it's a public route, allow access
-//         if (publicRoutes.some(route => pathname.startsWith(route))) {
-//           return true;
-//         }
-//         // For protected routes, check if user has a token
-//         return !!token;
-//       },
-//     },
-//   }
-// );
-
-// default middleware configuration
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // Redirect root path to job-list
-  if (request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/job-list", request.url));
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const { pathname } = req.nextUrl;
+
+    // Debug log (remove in production)
+    console.log("Middleware - Path:", pathname, "Has Token:", !!token);
+
+    // Redirect authenticated users away from auth pages
+    const authPages = ["/login", "/register"];
+    if (token && authPages.some(page => pathname.startsWith(page))) {
+      console.log("Redirecting authenticated user from auth page to /job-list");
+      return NextResponse.redirect(new URL("/job-list", req.url));
+    }
+
+    // Redirect root path to job-list
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/job-list", req.url));
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+
+        // Public routes that don't require authentication
+        const publicRoutes = ["/login", "/register"];
+
+        // Debug log (remove in production)
+        console.log("Auth Check - Path:", pathname, "Token exists:", !!token);
+
+        // Allow public routes - middleware will handle authenticated user redirects
+        if (publicRoutes.some(route => pathname.startsWith(route))) {
+          return true;
+        }
+
+        // For protected routes, check if user has a token
+        return !!token;
+      },
+    },
+    pages: {
+      signIn: "/login",
+    },
   }
-
-  return NextResponse.next(); // Continue the request
-}
+);
 
 export const config = {
   matcher: [

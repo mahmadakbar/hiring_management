@@ -42,6 +42,7 @@ const jobOpeningSchema = z
       ])
       .optional(),
     minimumProfileInformation: minimumProfileSchema,
+    location: z.string().min(1, { message: "Location is required" }),
   })
   .refine(
     data => {
