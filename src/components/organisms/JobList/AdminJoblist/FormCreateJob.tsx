@@ -13,7 +13,8 @@ import { Button } from "@components/atoms/button";
 import { Switch } from "@components/atoms/switch";
 import { Label } from "@components/atoms/label";
 import { jobTypeOptions, profileInfo } from "./listData";
-import { useJobListStore } from "@stores/jobListStore";
+import { useCreateJob, useUpdateJob } from "@services/mutation/jobsMutation";
+import { useGetJobById } from "@services/query/jobsQuery";
 import LoadingSpinner from "@components/atoms/loading";
 import { toast } from "@components/atoms/sonner";
 import { SaveIcon } from "lucide-react";
@@ -25,9 +26,15 @@ type FormCreateJobProps = Readonly<{
 }>;
 
 export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
-  const { addJob, getJobById, updateJob } = useJobListStore();
-  const [loading, setLoading] = React.useState(false);
   const [isActive, setIsActive] = React.useState(true);
+
+  // API hooks
+  const createJobMutation = useCreateJob();
+  const updateJobMutation = useUpdateJob();
+  const { data: jobData, isLoading: isLoadingJob } = useGetJobById(
+    jobId || "",
+    !!jobId
+  );
 
   const form = useForm<FormJobOpeningData>({
     resolver: zodResolver(jobOpeningSchema) as any,
@@ -53,53 +60,67 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
     mode: "onChange",
   });
 
+  // Load existing job data when editing
   useEffect(() => {
-    if (jobId) {
-      const jobData = getJobById(jobId);
-      if (jobData) {
-        form.reset({
-          jobName: jobData.jobName,
-          jobType: jobData.jobType,
-          jobDescription: jobData.jobDescription,
-          numberOfCandidatesNeeded:
-            jobData.numberOfCandidatesNeeded || undefined,
-          minimumSalary: jobData.minimumSalary
-            ? formatMoneyInput(jobData.minimumSalary.toString())
-            : null,
-          maximumSalary: jobData.maximumSalary
-            ? formatMoneyInput(jobData.maximumSalary.toString())
-            : null,
-          minimumProfileInformation: jobData.minimumProfileInformation,
+    if (jobId && jobData?.job) {
+      const job = jobData.job;
+      form.reset({
+        jobName: job.jobName,
+        jobType: job.jobType,
+        jobDescription: job.jobDescription,
+        numberOfCandidatesNeeded: job.numberOfCandidatesNeeded || undefined,
+        minimumSalary: job.minimumSalary
+          ? formatMoneyInput(job.minimumSalary.toString())
+          : null,
+        maximumSalary: job.maximumSalary
+          ? formatMoneyInput(job.maximumSalary.toString())
+          : null,
+        location: job.location,
+        minimumProfileInformation: job.minimumProfileInformation,
+      });
+      setIsActive(job.status === "active");
+    }
+  }, [jobId, jobData, form]);
+
+  const onSubmit = async (data: FormJobOpeningData) => {
+    // Convert salary strings to numbers
+    const processedData = {
+      jobName: data.jobName,
+      jobType: data.jobType,
+      jobDescription: data.jobDescription,
+      numberOfCandidatesNeeded: data.numberOfCandidatesNeeded || null,
+      minimumSalary: data.minimumSalary
+        ? Number(data.minimumSalary.replace(/\D/g, ""))
+        : null,
+      maximumSalary: data.maximumSalary
+        ? Number(data.maximumSalary.replace(/\D/g, ""))
+        : null,
+      location: data.location,
+      minimumProfileInformation: data.minimumProfileInformation,
+      status: isActive ? "active" : "inactive",
+    };
+
+    try {
+      if (jobId) {
+        // Update existing job
+        await updateJobMutation.mutateAsync({
+          id: jobId,
+          data: processedData,
         });
-        setIsActive(jobData.status === "active");
+      } else {
+        // Create new job
+        await createJobMutation.mutateAsync(processedData);
       }
-    }
-  }, [jobId, getJobById, form]);
 
-  const onSubmit = (data: FormJobOpeningData) => {
-    setLoading(true);
-
-    if (jobId) {
-      updateJob(jobId, data, isActive ? "active" : "inactive");
-    } else {
-      addJob(data, isActive ? "active" : "inactive");
-    }
-
-    console.log(
-      "Job successfully published with status:",
-      isActive ? "active" : "inactive",
-      data
-    );
-
-    setTimeout(() => {
       form.reset();
       onFinish?.();
-      setLoading(false);
-      toast.success("Job vacancy successfully created");
-    }, 1000);
+    } catch (error) {
+      // Error is already handled in mutation
+      console.error("Form submission error:", error);
+    }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     const data = form.getValues();
 
     // must have job name
@@ -108,22 +129,57 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
       return;
     }
 
-    if (jobId) {
-      updateJob(jobId, data, "draft");
-    } else {
-      addJob(data, "draft");
-    }
+    const processedData = {
+      jobName: data.jobName,
+      jobType: data.jobType,
+      jobDescription: data.jobDescription,
+      numberOfCandidatesNeeded: data.numberOfCandidatesNeeded || null,
+      minimumSalary: data.minimumSalary
+        ? Number(data.minimumSalary.replace(/\D/g, ""))
+        : null,
+      maximumSalary: data.maximumSalary
+        ? Number(data.maximumSalary.replace(/\D/g, ""))
+        : null,
+      location: data.location,
+      minimumProfileInformation: data.minimumProfileInformation,
+      status: "draft",
+    };
 
-    toast.success("Job vacancy saved as draft");
-    onFinish?.();
+    try {
+      if (jobId) {
+        await updateJobMutation.mutateAsync({
+          id: jobId,
+          data: processedData,
+        });
+      } else {
+        await createJobMutation.mutateAsync(processedData);
+      }
+
+      toast.success("Job vacancy saved as draft");
+      onFinish?.();
+    } catch (error) {
+      // Error is already handled in mutation
+      console.error("Save draft error:", error);
+    }
   };
 
+  // Show loading state when fetching job data
+  if (isLoadingJob) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  const isLoading = createJobMutation.isPending || updateJobMutation.isPending;
+
   return (
-    <div className="w-full overflow-y-auto px-6">
+    <div className="w-full overflow-y-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Job Name */}
-          <div className="max-h-[calc(100vh-13rem)] overflow-y-auto">
+          <div className="flex max-h-[calc(100vh-13rem)] flex-col gap-4 overflow-y-auto px-6">
             <FormInput
               form={form}
               name="jobName"
@@ -172,7 +228,7 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
 
             {/* Job Salary */}
             <div
-              className="space-y-4 pt-6"
+              className="mt-2 space-y-4 pt-6"
               style={{
                 borderTop: "1px dashed #E0E0E0",
                 borderImage:
@@ -228,7 +284,7 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-4 px-6 pt-4">
             {/* Toggle Switch */}
             <div className="flex items-center justify-between gap-2.5">
               <Label htmlFor="job-status" className="text-sm font-medium">
@@ -245,17 +301,17 @@ export default function FormCreateJob({ jobId, onFinish }: FormCreateJobProps) {
               variant="outline"
               className="rounded-lg px-6 py-2.5 text-sm font-semibold"
               onClick={handleSaveDraft}
-              disabled={loading}
+              disabled={isLoading}
             >
               <SaveIcon className="mr-2 h-4 w-4" />
               Save as Draft
             </Button>
             <Button
               type="submit"
-              disabled={!form.formState.isValid || loading}
+              disabled={!form.formState.isValid || isLoading}
               className="bg-secondary hover:bg-secondary-hover rounded-lg px-6 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? (
+              {isLoading ? (
                 <LoadingSpinner showText={false} size="sm" className="w-10" />
               ) : (
                 "Publish Job"

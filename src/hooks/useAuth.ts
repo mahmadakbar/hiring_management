@@ -10,9 +10,12 @@ export function useAuth() {
     });
   };
 
+  console.log("USE AUTH SESSION:", session);
+
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated";
   const user = session?.user;
+  const role = session?.user?.role;
 
   return {
     user,
@@ -20,5 +23,6 @@ export function useAuth() {
     isLoading,
     isAuthenticated,
     logout,
+    role,
   };
 }

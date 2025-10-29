@@ -36,7 +36,10 @@ export default function CardBackground({
           </div>
 
           <Button
-            onClick={onClickButton}
+            onClick={e => {
+              e.stopPropagation();
+              onClickButton?.();
+            }}
             className="bg-secondary hover:bg-secondary/90 disabled:bg-border-grey disabled:text-font-primary w-full font-bold text-white disabled:cursor-not-allowed"
           >
             Create New Job

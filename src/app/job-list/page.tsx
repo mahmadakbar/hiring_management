@@ -1,6 +1,5 @@
 import Background from "@components/atoms/background";
 import { JobListTemplate } from "@components/templates/JobListTemplate";
-import { createClient } from "@lib/superbase/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,12 +7,8 @@ export const metadata: Metadata = {
 };
 
 export default async function JobList() {
-  const supabase = await createClient();
-  const { data: instruments } = await supabase.from("instruments").select();
-
-  console.log("INSTRUMENTS:", instruments);
   return (
-    <Background>
+    <Background className="h-full">
       <div className="flex h-full w-full">
         <JobListTemplate />
       </div>

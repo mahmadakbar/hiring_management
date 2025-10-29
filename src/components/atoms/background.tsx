@@ -10,7 +10,7 @@ export default function Background({
   className,
 }: Readonly<BackgroundProps>) {
   return (
-    <section className="flex h-full flex-1">
+    <section className="flex h-full flex-1 overflow-hidden">
       <div className={cn("bg-background flex w-full flex-1 p-4", className)}>
         {children}
       </div>

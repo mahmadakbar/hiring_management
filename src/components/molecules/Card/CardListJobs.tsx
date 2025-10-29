@@ -39,7 +39,10 @@ export default function CardListJobs({
   return (
     <Card
       className="bg-card flex w-full cursor-pointer flex-row justify-between rounded-2xl border-0 p-6 shadow-sm transition-all hover:shadow-md"
-      onClick={onClick}
+      onClick={e => {
+        e.stopPropagation();
+        onClick?.();
+      }}
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">

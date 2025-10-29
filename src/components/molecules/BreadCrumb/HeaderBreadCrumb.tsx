@@ -10,8 +10,11 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { mappingBreadcrumbs } from "@utils";
+import { withRoleAccess } from "@components/hoc";
+import Image from "next/image";
+import { logo_rakamin } from "@assets/images";
 
-export default function HeaderBreadCrumb() {
+function HeaderBreadCrumb() {
   const pathname = usePathname();
 
   // Check if current path has sub-pages (e.g., /job-list/id or /job-list/menu)
@@ -66,3 +69,11 @@ export default function HeaderBreadCrumb() {
     </div>
   );
 }
+
+export default withRoleAccess(
+  HeaderBreadCrumb,
+  ["admin"],
+  <Link href="/">
+    <Image src={logo_rakamin} alt="Logo" width={40} height={40} />
+  </Link>
+);

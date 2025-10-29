@@ -44,7 +44,14 @@ export default function NotFoundData({
           {/* Action Buttons */}
           {showButton && (
             <div className="flex">
-              <Button variant="default" className="px-4" onClick={onCreateJob}>
+              <Button
+                variant="default"
+                className="px-4"
+                onClick={e => {
+                  e.stopPropagation();
+                  onCreateJob?.();
+                }}
+              >
                 Create New Job
               </Button>
             </div>

@@ -16,7 +16,9 @@ export default function Header() {
   return (
     <header className="flex shrink-0 items-center justify-between rounded-lg bg-white px-4 py-5 text-black shadow-sm">
       <HeaderBreadCrumb />
-      <ProfileHeader />
+      <div className="ml-auto">
+        <ProfileHeader />
+      </div>
     </header>
   );
 }

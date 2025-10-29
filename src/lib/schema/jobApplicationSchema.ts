@@ -3,7 +3,9 @@ import z from "zod";
 // Schema for job application form
 const jobApplicationSchema = z.object({
   photoProfile: z
-    .instanceof(File)
+    .instanceof(File, {
+      message: "Photo profile is required",
+    })
     .refine(file => file.size > 0, {
       message: "Photo profile is required",
     })
@@ -15,9 +17,7 @@ const jobApplicationSchema = z.object({
       {
         message: "Only .jpg, .jpeg, and .png formats are supported",
       }
-    )
-    .optional()
-    .or(z.string().url().optional()),
+    ),
 
   fullName: z
     .string()

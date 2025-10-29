@@ -1,5 +1,6 @@
 export interface IJobPosting {
   id: string;
+  jobId: string;
   jobName: string;
   jobType: string;
   jobDescription: string;

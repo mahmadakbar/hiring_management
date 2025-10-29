@@ -18,6 +18,7 @@ export {
   parseDate,
   parseMoney,
   capitalize,
+  fileToBase64,
 } from "./helper";
 export {
   blacklistPaths,

@@ -5,6 +5,7 @@ import { PopupCreateJob } from "@components/molecules/Popup";
 import AdminJoblist from "@components/organisms/JobList/AdminJoblist";
 import FormCreateJob from "@components/organisms/JobList/AdminJoblist/FormCreateJob";
 import CandidateJoblist from "@components/organisms/JobList/CandidateJoblist";
+import { RoleGuard } from "@/components/hoc";
 import { useState } from "react";
 
 export default function JobListTemplate() {
@@ -20,28 +21,34 @@ export default function JobListTemplate() {
   };
 
   return (
-    <div className="flex w-full gap-6">
-      {/* <CandidateJoblist /> */}
+    <div className="flex h-full w-full gap-6">
+      {/* Candidate view - only visible to users with "user" role */}
+      <RoleGuard allowedRoles={["user"]}>
+        <CandidateJoblist />
+      </RoleGuard>
 
-      <AdminJoblist onCreateJobClick={handleCreateJob} />
+      {/* Admin view - only visible to users with "admin" role */}
+      <RoleGuard allowedRoles={["admin"]}>
+        <AdminJoblist onCreateJobClick={handleCreateJob} />
 
-      <div className="sticky top-6 self-start">
-        <CardBackground onClickButton={handleCreateJob} />
-      </div>
+        <div className="sticky top-6 self-start">
+          <CardBackground onClickButton={handleCreateJob} />
+        </div>
 
-      <PopupCreateJob
-        open={isPopupOpen}
-        onOpenChange={setIsPopupOpen}
-        content={
-          <FormCreateJob
-            jobId={selectedJobId}
-            onFinish={() => {
-              setIsPopupOpen(false);
-              setSelectedJobId(undefined);
-            }}
-          />
-        }
-      />
+        <PopupCreateJob
+          open={isPopupOpen}
+          onOpenChange={setIsPopupOpen}
+          content={
+            <FormCreateJob
+              jobId={selectedJobId}
+              onFinish={() => {
+                setIsPopupOpen(false);
+                setSelectedJobId(undefined);
+              }}
+            />
+          }
+        />
+      </RoleGuard>
     </div>
   );
 }

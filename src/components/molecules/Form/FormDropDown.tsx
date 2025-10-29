@@ -118,7 +118,10 @@ export default function FormDropDown<T extends FieldValues>({
               </FormLabel>
             )}
             <FormControl>
-              <Popover open={open} onOpenChange={setOpen}>
+              <Popover
+                open={open}
+                onOpenChange={typeToSearch ? undefined : setOpen}
+              >
                 {typeToSearch ? (
                   // Type-to-search mode: Input field as trigger
                   <PopoverAnchor asChild>
@@ -131,6 +134,7 @@ export default function FormDropDown<T extends FieldValues>({
                           if (!open) setOpen(true);
                         }}
                         onFocus={() => setOpen(true)}
+                        onBlur={() => setOpen(false)}
                         disabled={disabled}
                         className={cn(
                           "placeholder:text-font-placeholder border-line h-10 w-full rounded-lg border-2 bg-white px-4 py-4 pr-10 text-sm font-normal text-gray-900 transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
@@ -171,7 +175,7 @@ export default function FormDropDown<T extends FieldValues>({
                   </PopoverTrigger>
                 )}
                 <PopoverContent
-                  className="p-0"
+                  className="flex max-h-[300px] flex-col p-0"
                   align="start"
                   style={{
                     width: "var(--radix-popover-trigger-width)",
@@ -181,7 +185,10 @@ export default function FormDropDown<T extends FieldValues>({
                 >
                   {typeToSearch ? (
                     // Type-to-search mode: Same UI as standard mode
-                    <div className="overflow-y-auto" style={{ maxHeight }}>
+                    <div
+                      className="flex-1 overflow-y-auto"
+                      style={{ maxHeight: maxHeight || "200px" }}
+                    >
                       {options.filter(option =>
                         option.label
                           .toLowerCase()
@@ -238,9 +245,9 @@ export default function FormDropDown<T extends FieldValues>({
                     </div>
                   ) : (
                     // Standard mode: Manual search with buttons
-                    <div className="flex flex-col">
+                    <div className="flex max-h-full flex-col">
                       {searchable && (
-                        <div className="flex items-center border-b p-2">
+                        <div className="flex shrink-0 items-center border-b p-2">
                           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                           <Input
                             placeholder={searchPlaceholder}
@@ -250,7 +257,10 @@ export default function FormDropDown<T extends FieldValues>({
                           />
                         </div>
                       )}
-                      <div className="overflow-y-auto" style={{ maxHeight }}>
+                      <div
+                        className="flex-1 overflow-y-auto"
+                        style={{ maxHeight: maxHeight || "200px" }}
+                      >
                         {options.filter(option =>
                           searchable
                             ? option.label
