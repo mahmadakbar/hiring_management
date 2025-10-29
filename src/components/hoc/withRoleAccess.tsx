@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { NotFoundPage } from "@components/templates/NotFoundTemplate";
+import LoadingTemplate from "@components/templates/LoadingTemplate";
 import { ComponentType, ReactNode } from "react";
 
 type UserRole = "user" | "admin";
@@ -34,9 +35,9 @@ export function withRoleAccess<P extends object>(
   return function RoleAccessComponent(props: P) {
     const { role, isLoading } = useAuth();
 
-    // Don't render anything while loading
+    // Show loading state while checking authentication
     if (isLoading) {
-      return null;
+      return <LoadingTemplate />;
     }
 
     // Check if user has required role
@@ -75,9 +76,9 @@ export function RoleGuard({
 }: RoleAccessProps) {
   const { role, isLoading } = useAuth();
 
-  // Don't render anything while loading
+  // Show loading state while checking authentication
   if (isLoading) {
-    return null;
+    return <LoadingTemplate />;
   }
 
   // Check if user has required role

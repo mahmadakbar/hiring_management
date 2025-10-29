@@ -886,14 +886,6 @@ Use these credentials to test different user roles:
    - Manage user permissions and roles
    - Monitor user activity
 
-### Tips for Best Experience
-
-- **Keep Profile Updated**: Ensure your profile information is current
-- **Upload Quality Documents**: Use PDF format for professional documents
-- **Check Regularly**: Visit the platform regularly for new job postings
-- **Follow Instructions**: Read job descriptions carefully before applying
-- **Be Responsive**: Check your email for notifications and updates
-
 ## 🔧 Troubleshooting
 
 ### Common Issues
@@ -936,10 +928,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License.
-
-## 📧 Contact
-
-For questions or support, please contact the development team.
 
 ---
 

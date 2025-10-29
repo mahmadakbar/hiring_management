@@ -36,22 +36,15 @@ export default function FormLogin() {
     try {
       setIsLoading(true);
 
-      const result = await signIn("google", {
+      // For Google OAuth, let NextAuth handle the redirect
+      // Setting redirect: true will properly handle the OAuth flow
+      await signIn("google", {
         callbackUrl: "/job-list",
-        redirect: false,
+        redirect: true,
       });
-
-      if (result?.error) {
-        toast.error("Failed to sign in with Google. Please try again.");
-      } else if (result?.ok) {
-        toast.success("Successfully signed in!");
-        // Use window.location for full page refresh
-        window.location.href = result?.url || "/job-list";
-      }
     } catch (error) {
       toast.error("An unexpected error occurred. Please try again.");
       console.error("Google sign in error:", error);
-    } finally {
       setIsLoading(false);
     }
   };

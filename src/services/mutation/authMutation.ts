@@ -4,7 +4,7 @@ import { apiRegister, apiCheckEmail, apiLogin } from "@services/api/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { handleRegistrationError } from "@utils";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export const useRegister = () => {
   const router = useRouter();
@@ -76,8 +76,13 @@ export const useLogin = () => {
     onSuccess: async data => {
       toast.success("Login berhasil!");
 
-      // Use window.location for a full page refresh to ensure session is loaded
-      window.location.href = data?.url || "/job-list";
+      // Small delay to ensure session cookie is set
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Use Next.js router for smooth navigation
+      // The session will be automatically available via SessionProvider
+      router.push(data?.url || "/job-list");
+      router.refresh();
     },
     onError: (error: any) => {
       console.error("Login error:", error);
