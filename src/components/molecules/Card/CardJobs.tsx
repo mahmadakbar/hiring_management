@@ -65,7 +65,7 @@ export default function CardListJobs({ job }: CardJobsProps) {
         <div className="text-muted-foreground flex flex-col gap-1 text-sm">
           <div className="flex items-center gap-1">
             <LocationIcon />
-            <span>Jakarta Selatan</span>
+            <span className="capitalize">{job.location}</span>
           </div>
           <div className="flex items-center gap-1">
             <MoneyIcon />
