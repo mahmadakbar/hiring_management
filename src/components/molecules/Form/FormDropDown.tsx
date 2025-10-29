@@ -118,10 +118,7 @@ export default function FormDropDown<T extends FieldValues>({
               </FormLabel>
             )}
             <FormControl>
-              <Popover
-                open={open}
-                onOpenChange={typeToSearch ? undefined : setOpen}
-              >
+              <Popover open={open} onOpenChange={setOpen} modal={true}>
                 {typeToSearch ? (
                   // Type-to-search mode: Input field as trigger
                   <PopoverAnchor asChild>
@@ -175,7 +172,7 @@ export default function FormDropDown<T extends FieldValues>({
                   </PopoverTrigger>
                 )}
                 <PopoverContent
-                  className="flex max-h-[300px] flex-col p-0"
+                  className="z-150 flex max-h-[300px] flex-col p-0"
                   align="start"
                   style={{
                     width: "var(--radix-popover-trigger-width)",
