@@ -86,7 +86,7 @@ export default function AdminJoblist({ onCreateJobClick }: AdminJoblistProps) {
           </p>
         </div>
       ) : jobs.length > 0 ? (
-        <div className="mt-6 flex flex-col gap-4 pb-8">
+        <div className="mt-6 flex flex-col gap-4 overflow-y-auto pb-8">
           {jobs.map(job => (
             <CardListJobs
               key={job.id}

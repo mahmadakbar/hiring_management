@@ -78,7 +78,7 @@ export function RoleGuard({
 
   // Show loading state while checking authentication
   if (isLoading) {
-    return <LoadingTemplate />;
+    return null;
   }
 
   // Check if user has required role
@@ -88,7 +88,7 @@ export function RoleGuard({
     return fallback ? <div className="flex-1">{fallback}</div> : null;
   }
 
-  return <>{children}</>;
+  return <div className="flex-1">{children}</div>;
 }
 
 /**

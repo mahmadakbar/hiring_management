@@ -29,25 +29,27 @@ export default function JobListTemplate() {
 
       {/* Admin view - only visible to users with "admin" role */}
       <RoleGuard allowedRoles={["admin"]}>
-        <AdminJoblist onCreateJobClick={handleCreateJob} />
+        <div className="flex h-full w-full gap-6">
+          <AdminJoblist onCreateJobClick={handleCreateJob} />
 
-        <div className="sticky top-6 self-start">
-          <CardBackground onClickButton={handleCreateJob} />
+          <div className="sticky top-6 self-start">
+            <CardBackground onClickButton={handleCreateJob} />
+          </div>
+
+          <PopupCreateJob
+            open={isPopupOpen}
+            onOpenChange={setIsPopupOpen}
+            content={
+              <FormCreateJob
+                jobId={selectedJobId}
+                onFinish={() => {
+                  setIsPopupOpen(false);
+                  setSelectedJobId(undefined);
+                }}
+              />
+            }
+          />
         </div>
-
-        <PopupCreateJob
-          open={isPopupOpen}
-          onOpenChange={setIsPopupOpen}
-          content={
-            <FormCreateJob
-              jobId={selectedJobId}
-              onFinish={() => {
-                setIsPopupOpen(false);
-                setSelectedJobId(undefined);
-              }}
-            />
-          }
-        />
       </RoleGuard>
     </div>
   );
