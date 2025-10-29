@@ -10,11 +10,6 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import Loading from "@components/atoms/loading";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@components/atoms/popover";
 import { Stepper } from "@components/atoms/stepper";
 
 export default function DetailsJob() {
@@ -77,7 +72,7 @@ export default function DetailsJob() {
           <Button
             onClick={() => router.push("/apply?jobId=" + job.id)}
             className="rounded-xl px-4 py-1 text-sm"
-            // disabled={hasApplied || isCheckingApplication}
+            disabled={hasApplied || isCheckingApplication}
           >
             {isCheckingApplication
               ? "Checking..."
