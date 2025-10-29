@@ -83,8 +83,6 @@ Standard role for job seekers and applicants.
 - ✅ Submit job applications
 - ✅ Upload documents (CV, cover letter, etc.) - components are available but not yet implemented
 - ✅ Track own application status
-- ✅ Update personal profile
-- ✅ Manage personal account settings
 - ❌ Cannot create or modify job postings
 - ❌ Cannot view other users' applications
 - ❌ Cannot access admin dashboard
@@ -496,7 +494,6 @@ Use these credentials to test different user roles:
 
 4. **User Management**
    - View registered users and their information
-   - Manage user permissions and roles
    - Monitor user activity
 
 ## 🔧 Troubleshooting
