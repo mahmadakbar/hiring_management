@@ -10,6 +10,7 @@ A modern hiring management application built with Next.js 15, featuring job list
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Environment Setup](#-environment-setup)
+- [Supabase Integration](#️-supabase-integration)
 - [Available Scripts](#-available-scripts)
 - [Test Credentials](#-test-credentials)
 - [User Starter Guide](#-user-starter-guide)
@@ -56,13 +57,16 @@ A modern hiring management application built with Next.js 15, featuring job list
 
 - 🔐 **Authentication** - Secure login/register with NextAuth.js
 - 👥 **Role-Based Access Control** - Admin and User roles with different permissions
+- 🗄️ **Supabase Backend** - Powerful BaaS with PostgreSQL database, real-time subscriptions, and file storage
+- 🔒 **Row Level Security** - Database-level security policies ensuring data privacy and access control
 - 💼 **Job Management** - Browse and search available job listings
 - 📝 **Application System** - Apply for jobs with document upload
+- 📁 **Cloud Storage** - Secure file storage and management with Supabase Storage
 - 🎨 **Modern UI** - Responsive design with Tailwind CSS and Radix UI components
-- 🌙 **Theme Support** - Light/dark mode toggle
 - 📊 **State Management** - Efficient data handling with TanStack Query and Zustand
 - 🔍 **Form Validation** - Type-safe forms with React Hook Form and Zod
 - 🎯 **Hand Gesture Detection** - Innovative interaction using MediaPipe
+- ⚡ **Real-time Updates** - Live notifications and data synchronization with Supabase real-time
 
 ## 👥 Role-Based Access Control (RBAC)
 
@@ -358,6 +362,420 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 - Create a Supabase project at [supabase.com](https://supabase.com)
 - Set up your database tables
 - Copy your project URL and API keys to the `.env.local` file
+
+## 🗄️ Supabase Integration
+
+This application uses **Supabase** as the Backend-as-a-Service (BaaS) platform, providing authentication, database, and storage capabilities.
+
+### 📋 Setting Up Supabase
+
+#### 1. Create a Supabase Project
+
+1. Go to [supabase.com](https://supabase.com) and sign up/login
+2. Click "New Project"
+3. Fill in your project details:
+   - **Name**: hiring_management
+   - **Database Password**: Choose a strong password
+   - **Region**: Select the closest region to your users
+4. Wait for the project to be provisioned (usually takes 1-2 minutes)
+
+#### 2. Get Your API Keys
+
+1. Navigate to **Settings** → **API** in your Supabase dashboard
+2. Copy the following credentials:
+   - **Project URL**: `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon/public key**: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role key**: `SUPABASE_SERVICE_ROLE_KEY` (keep this secret!)
+
+3. Add these to your `.env.local` file:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 🗃️ Database Schema
+
+Create the following tables in your Supabase database:
+
+#### Users Table
+
+```sql
+CREATE TABLE users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(50) DEFAULT 'user' NOT NULL,
+  avatar_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create index for faster email lookups
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+```
+
+#### Jobs Table
+
+```sql
+CREATE TABLE jobs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  company VARCHAR(255) NOT NULL,
+  location VARCHAR(255),
+  type VARCHAR(100), -- full-time, part-time, contract, etc.
+  salary_min NUMERIC(12, 2),
+  salary_max NUMERIC(12, 2),
+  description TEXT NOT NULL,
+  requirements TEXT,
+  responsibilities TEXT,
+  status VARCHAR(50) DEFAULT 'open' NOT NULL, -- open, closed, archived
+  posted_by UUID REFERENCES users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes
+CREATE INDEX idx_jobs_status ON jobs(status);
+CREATE INDEX idx_jobs_posted_by ON jobs(posted_by);
+CREATE INDEX idx_jobs_created_at ON jobs(created_at DESC);
+```
+
+#### Applications Table
+
+```sql
+CREATE TABLE applications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  job_id UUID REFERENCES jobs(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending' NOT NULL, -- pending, reviewing, accepted, rejected
+  cover_letter TEXT,
+  resume_url TEXT,
+  additional_documents JSONB DEFAULT '[]'::jsonb,
+  notes TEXT,
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(job_id, user_id) -- Prevent duplicate applications
+);
+
+-- Create indexes
+CREATE INDEX idx_applications_job_id ON applications(job_id);
+CREATE INDEX idx_applications_user_id ON applications(user_id);
+CREATE INDEX idx_applications_status ON applications(status);
+CREATE INDEX idx_applications_created_at ON applications(created_at DESC);
+```
+
+### 🔐 Row Level Security (RLS)
+
+Enable Row Level Security to protect your data:
+
+#### Enable RLS on Tables
+
+```sql
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+```
+
+#### Users Table Policies
+
+```sql
+-- Users can view their own data
+CREATE POLICY "Users can view own data"
+  ON users FOR SELECT
+  USING (auth.uid() = id);
+
+-- Users can update their own data
+CREATE POLICY "Users can update own data"
+  ON users FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Admins can view all users
+CREATE POLICY "Admins can view all users"
+  ON users FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
+```
+
+#### Jobs Table Policies
+
+```sql
+-- Everyone can view open jobs
+CREATE POLICY "Anyone can view open jobs"
+  ON jobs FOR SELECT
+  USING (status = 'open');
+
+-- Admins can manage all jobs
+CREATE POLICY "Admins can manage jobs"
+  ON jobs FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
+```
+
+#### Applications Table Policies
+
+```sql
+-- Users can view their own applications
+CREATE POLICY "Users can view own applications"
+  ON applications FOR SELECT
+  USING (user_id = auth.uid());
+
+-- Users can create applications
+CREATE POLICY "Users can create applications"
+  ON applications FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+-- Admins can view all applications
+CREATE POLICY "Admins can view all applications"
+  ON applications FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
+
+-- Admins can update all applications
+CREATE POLICY "Admins can update applications"
+  ON applications FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
+```
+
+### 📦 Storage Setup
+
+Configure Supabase Storage for file uploads (resumes, documents):
+
+#### 1. Create Storage Bucket
+
+```sql
+-- Create a bucket for application documents
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('applications', 'applications', false);
+```
+
+#### 2. Set Storage Policies
+
+```sql
+-- Allow authenticated users to upload their own files
+CREATE POLICY "Users can upload own documents"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'applications' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Allow users to view their own files
+CREATE POLICY "Users can view own documents"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'applications' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Allow admins to view all files
+CREATE POLICY "Admins can view all documents"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'applications' AND
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+    )
+  );
+```
+
+### 🔌 Supabase Client Configuration
+
+The Supabase client is configured in `src/lib/superbase/` directory:
+
+```typescript
+// src/lib/superbase/client.ts
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```
+
+### 🚀 Using Supabase in the Application
+
+#### Authentication Example
+
+```typescript
+// Login
+const { data, error } = await supabase.auth.signInWithPassword({
+  email: 'user@example.com',
+  password: 'password123'
+})
+
+// Register
+const { data, error } = await supabase.auth.signUp({
+  email: 'user@example.com',
+  password: 'password123',
+  options: {
+    data: {
+      name: 'John Doe'
+    }
+  }
+})
+
+// Logout
+await supabase.auth.signOut()
+```
+
+#### Database Operations
+
+```typescript
+// Fetch jobs
+const { data: jobs, error } = await supabase
+  .from('jobs')
+  .select('*')
+  .eq('status', 'open')
+  .order('created_at', { ascending: false })
+
+// Create application
+const { data, error } = await supabase
+  .from('applications')
+  .insert({
+    job_id: jobId,
+    user_id: userId,
+    cover_letter: coverLetter,
+    resume_url: resumeUrl
+  })
+
+// Update application status
+const { data, error } = await supabase
+  .from('applications')
+  .update({ status: 'accepted' })
+  .eq('id', applicationId)
+```
+
+#### File Upload Example
+
+```typescript
+// Upload resume
+const file = event.target.files[0]
+const fileName = `${userId}/${Date.now()}_${file.name}`
+
+const { data, error } = await supabase.storage
+  .from('applications')
+  .upload(fileName, file)
+
+// Get public URL
+const { data: { publicUrl } } = supabase.storage
+  .from('applications')
+  .getPublicUrl(fileName)
+```
+
+### 🔄 Real-time Subscriptions (Optional)
+
+Enable real-time updates for live notifications:
+
+```typescript
+// Subscribe to new applications
+const subscription = supabase
+  .channel('applications')
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'applications'
+    },
+    (payload) => {
+      console.log('New application:', payload.new)
+    }
+  )
+  .subscribe()
+
+// Unsubscribe when done
+subscription.unsubscribe()
+```
+
+### 📊 Database Functions (Optional)
+
+Create useful database functions:
+
+```sql
+-- Function to automatically update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to all tables
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_jobs_updated_at
+  BEFORE UPDATE ON jobs
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_applications_updated_at
+  BEFORE UPDATE ON applications
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+```
+
+### 🛠️ Useful Supabase CLI Commands
+
+```bash
+# Install Supabase CLI
+npm install -g supabase
+
+# Login to Supabase
+supabase login
+
+# Link to your project
+supabase link --project-ref your-project-ref
+
+# Generate TypeScript types from your database
+supabase gen types typescript --linked > src/types/database.ts
+
+# Run migrations
+supabase db push
+
+# Reset database (local development)
+supabase db reset
+```
+
+### 📚 Additional Resources
+
+- [Supabase Documentation](https://supabase.com/docs)
+- [Supabase JavaScript Client](https://supabase.com/docs/reference/javascript/introduction)
+- [Row Level Security Guide](https://supabase.com/docs/guides/auth/row-level-security)
+- [Supabase Storage](https://supabase.com/docs/guides/storage)
+- [Real-time Subscriptions](https://supabase.com/docs/guides/realtime)
 
 ## 📜 Available Scripts
 
