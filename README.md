@@ -65,7 +65,6 @@ A modern hiring management application built with Next.js 15, featuring job list
 - 📊 **State Management** - Efficient data handling with TanStack Query and Zustand
 - 🔍 **Form Validation** - Type-safe forms with React Hook Form and Zod
 - 🎯 **Hand Gesture Detection** - Innovative interaction using MediaPipe
-- ⚡ **Real-time Updates** - Live notifications and data synchronization with Supabase real-time
 
 ## 👥 Role-Based Access Control (RBAC)
 
